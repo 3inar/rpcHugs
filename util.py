@@ -2,12 +2,6 @@ import subprocess
 import threading
 from sys import platform
 from socket import gethostbyname, gethostname
-from os import system, getpid
-from time import time
-
-def die():
-    pid = getpid()
-    system("kill -9 " + str(pid))
 
 def get_host():
     if platform == "darwin":
@@ -20,7 +14,6 @@ def get_host():
             host = hosts[0]
         else:
             host = gethostbyname(gethostname())
-
     return str(host)
 
 class StoppableThread(threading.Thread):
@@ -36,7 +29,4 @@ class StoppableThread(threading.Thread):
 
     def stop(self):
         self.running = False
-
-def time_now():
-    return time()*1000.0
 
