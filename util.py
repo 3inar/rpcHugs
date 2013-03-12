@@ -16,13 +16,9 @@ def get_host():
             host = gethostbyname(gethostname())
     return str(host)
 
+# for threads that loop forever, but some times need to be stopped
+# NB that the stop method obviously only works if the thread isn't blocked
 class StoppableThread(threading.Thread):
-    """
-    Class stub implementing the stop method. This can be
-    inherited by all threads that need to be explicitely
-    stoppable, that is, all threads with a while true loop.
-    """
-
     def __init__(self):
         threading.Thread.__init__(self)
         self.running = True
