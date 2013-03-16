@@ -105,7 +105,7 @@ if __name__ == "__main__":
     remote_address = callee.server_info()
     callee = Dummy(caller, remote_address)
 
-    for i in range(2000):
+    for i in range(10000):
         value = callee.add(i, i**2)
         print ' '.join([str(i), "+", str(i**2), "=", str(value)])
 

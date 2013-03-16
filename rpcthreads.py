@@ -1,6 +1,7 @@
 import threading
 import socket
 import cPickle as pickle
+from errno import EAGAIN
 
 def _get_and_call(object, method, *arguments):
         try:
@@ -18,13 +19,13 @@ class _accept_thread(threading.Thread):
         self.rpc = rpc
 
     def run(self):
-        EAGAIN = True
-        while EAGAIN:
+        TRYAGAIN = True
+        while TRYAGAIN:
             try:
                 incoming_string = self.incoming_socket.recv(10000)
-                EAGAIN = False
+                TRYAGAIN = False
             except Exception as e:
-                if e[0] == 35:
+                if e[0] == EAGAIN:
                     # this is a workaround to a OS X specific bug where you
                     # need to explicitly handle EAGAIN
                     continue
