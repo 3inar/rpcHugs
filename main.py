@@ -8,7 +8,7 @@ from rpcthreads import _accept_thread, _call_thread, _get_and_call
 
 class Dummy():
     def __init__(self, rpc, proxy):
-        self.proxy = (proxy[0], proxy[1])
+        self.proxy = tuple(proxy)
         self.rpc = rpc
 
     def __getattr__(self, name):
@@ -29,13 +29,13 @@ class RPC:
     def server_info(self):
         return (self.server.host, self.server.port)
 
-    def call(self, connection, method, *args):
+    def call(self, callee, method, *args):
         queue = Queue.Queue()
 
-        if self.server_info() == connection:
+        if self.server_info() == callee:
             return _get_and_call(self, method, *args)
 
-        cStub = _call_thread(queue, connection, method, *args)
+        cStub = _call_thread(queue, callee, method, *args)
         cStub.start()
         ret = queue.get()
         cStub.join()

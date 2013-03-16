@@ -43,20 +43,19 @@ class _accept_thread(threading.Thread):
             pass
 
 class _call_thread(threading.Thread):
-    def __init__(self, queue, (host, port), method, *args):
+    def __init__(self, queue, callee, method, *args):
         threading.Thread.__init__(self)
         msec = 0.001
         self.timeout = 3000*msec
-        self.port = port
+        self.callee = callee
         self.queue = queue
         self.message = (method, args)
-        self.host = host
         self.socket = None
 
     def run(self):
         try:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.socket.connect((self.host, self.port))
+            self.socket.connect(self.callee)
             self.socket.sendall(pickle.dumps(self.message))
             data = self.socket.recv(10024)
             self.socket.close()
