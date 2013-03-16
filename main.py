@@ -1,4 +1,3 @@
-import sys
 import socket
 import select
 import time
@@ -71,7 +70,7 @@ class ServerStub(util.StoppableThread):
             if self.socket:
                 self.socket.close()
             print "Could not open socket: " + message
-            sys.exit(1)
+            exit(1)
 
     def run(self):
         reads = [self.socket]
