@@ -63,10 +63,9 @@ class ServerStub(util.StoppableThread):
             self.host = util.get_host()
             self.socket.listen(self.backlog)
             self.socket.setblocking(0)
-        except socket.error, (value, message):
-            if self.socket:
-                self.socket.close()
-            print "Could not open socket: " + message
+        except Exception as e:
+            print "RPC server stub could not open socket:"
+            print e
             exit(1)
 
     def run(self):
@@ -95,17 +94,24 @@ class _testRpc(RPC):
         return a + b
 
 if __name__ == "__main__":
-    caller = _testRpc()
-    callee = _testRpc()
+    try:
+        # the callee doesn't have to be of same derived class as caller
+        caller_rpc = _testRpc()
+        callee_rpc = _testRpc()
 
-    remote_address = callee.server_info()
-    callee = Dummy(caller, remote_address)
+        remote_address = callee_rpc.server_info()
+        callee = Dummy(caller_rpc, remote_address)
 
-    for i in range(10000):
-        value = callee.add(i, i**2)
-        print ' '.join([str(i), "+", str(i**2), "=", str(value)])
-
-    caller.shutdown()
-    callee.shutdown()
-    quit()
+        for i in range(10000):
+            value = callee.add(i, i**2)
+            print ' '.join([str(i), "+", str(i**2), "=", str(value)])
+    except:
+        raise
+    finally:
+        # NB that if you DON'T handle exceptions in the RPC thing like this,
+        # an exception will cause you to wait for the server stub forever
+        # (unless the server stub was the thread that died, but that is not
+        # what usually happens)
+        caller_rpc.shutdown()
+        callee_rpc.shutdown()
 

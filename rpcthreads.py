@@ -61,14 +61,8 @@ class _call_thread(threading.Thread):
             data = self.socket.recv(10024)
             self.socket.close()
             self.queue.put(pickle.loads(data))
-        except socket.timeout:
-            self.queue.put(socket.timeout)
-        except socket.error as (errno, msg):
-            if errno != 4:
-                self.queue.put(socket.error)
-        except ValueError:
-            print "Data:" + str(data)
-            print "Message: "+str(self.message)
+        except Exception as e:
+            self.queue.put(e)
         finally:
             if self.socket:
                 self.socket.close()
