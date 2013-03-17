@@ -10,6 +10,13 @@ class Dummy():
         self.proxy = tuple(proxy)
         self.rpc = rpc
 
+    def __repr__(self):
+        return "<remote RPC module at " + self.proxy[0] +":" + str(self.proxy[1]) + ">"
+
+    def __str__(self):
+        return self.proxy[0] +":" + str(self.proxy[1])
+        
+
     def __getattr__(self, name):
         # I'm to this day uncertain how this works, just run with it man
         def get(_name, *args):
