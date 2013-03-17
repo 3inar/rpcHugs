@@ -80,8 +80,9 @@ class ServerStub(util.StoppableThread):
                 try:
                     rpc = _accept_thread(self.rpc, s.accept())
                     rpc.start()
-                except socket.error:
+                except socket.error as e:
                     # Q: why do we simply pass here?
+                    print e
                     pass
         self.socket.close()
 
@@ -95,6 +96,8 @@ class _testRpc(RPC):
 
 if __name__ == "__main__":
     try:
+        import sys
+    
         # the callee doesn't have to be of same derived class as caller
         caller_rpc = _testRpc()
         callee_rpc = _testRpc()
@@ -102,10 +105,16 @@ if __name__ == "__main__":
         remote_address = callee_rpc.server_info()
         callee = Dummy(caller_rpc, remote_address)
 
-        for i in range(10000):
+        num_tests = 10000
+        print 'adding two numbers ' + str(num_tests) + ' times via RPC'
+        for i in range(num_tests):
             value = callee.add(i, i**2)
-            print ' '.join([str(i), "+", str(i**2), "=", str(value)])
+            sys.stdout.write('\r' + str(int(i*100.0/num_tests)) + ' %')
+        sys.stdout.write('\rDONE       \n')
+        sys.stdout.flush()
     except:
+        sys.stdout.write('\n')
+        sys.stdout.flush()
         raise
     finally:
         # NB that if you DON'T handle exceptions in the RPC thing like this,

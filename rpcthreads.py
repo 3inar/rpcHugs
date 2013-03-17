@@ -3,6 +3,20 @@ import socket
 import cPickle as pickle
 from errno import EAGAIN
 
+def _recv(recv_socket):
+        TRYAGAIN = True
+        while TRYAGAIN:
+            try:
+                incoming_string = recv_socket.recv(10000)
+                TRYAGAIN = False
+            except Exception as e:
+                if e[0] == EAGAIN:
+                    # this is a workaround to a OS X specific bug where you
+                    # need to explicitly handle EAGAIN
+                    continue
+                raise e
+        return incoming_string
+
 def _get_and_call(object, method, *arguments):
         try:
             m = getattr(object, method)
@@ -19,28 +33,19 @@ class _accept_thread(threading.Thread):
         self.rpc = rpc
 
     def run(self):
-        TRYAGAIN = True
-        while TRYAGAIN:
-            try:
-                incoming_string = self.incoming_socket.recv(10000)
-                TRYAGAIN = False
-            except Exception as e:
-                if e[0] == EAGAIN:
-                    # this is a workaround to a OS X specific bug where you
-                    # need to explicitly handle EAGAIN
-                    continue
-                raise e
-
         try:
-            m, arguments = pickle.loads(incoming_string)
+            binary = _recv(self.incoming_socket)
+            m, arguments = pickle.loads(binary)
         except EOFError:
+            # Q: what's up with this exception conversion?
+            # it certainly won't percolate up to the parent thread
             raise socket.error
 
         try:
             return_value = _get_and_call(self.rpc, m, *arguments)
             self.incoming_socket.sendall(pickle.dumps(return_value))
         except socket.error:
-            # Q: why do we simply pass here?
+            # we don't care whether or no the recipient is there for the result
             pass
 
 class _call_thread(threading.Thread):
@@ -58,7 +63,7 @@ class _call_thread(threading.Thread):
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.connect(self.callee)
             self.socket.sendall(pickle.dumps(self.message))
-            data = self.socket.recv(10024)
+            data = _recv(self.socket)
             self.socket.close()
             self.queue.put(pickle.loads(data))
         except Exception as e:
