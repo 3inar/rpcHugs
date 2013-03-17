@@ -39,12 +39,9 @@ class RPC:
         ret = queue.get()
         cStub.join()
 
-        if ret == socket.timeout:
-            raise socket.timeout
-        elif ret == socket.error:
-            raise socket.error
-        else:
-            return ret
+        if issubclass(ret.__class__, Exception):
+            raise ret
+        return ret
 
     def echo(self, item):
         return item
