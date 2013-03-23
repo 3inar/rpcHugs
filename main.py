@@ -16,7 +16,6 @@ class Dummy():
     def __str__(self):
         return self.proxy[0] +":" + str(self.proxy[1])
         
-
     def __getattr__(self, name):
         # I'm to this day uncertain how this works, just run with it man
         def get(_name, *args):
@@ -27,6 +26,9 @@ class RPC:
     def __init__(self, port=0):
         self.server = ServerStub(self, port)
         self.server.start()
+
+    def is_alive(self):
+        return self.server.is_alive()
 
     def shutdown(self):
         self.server.stop()
