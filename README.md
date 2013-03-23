@@ -1,4 +1,4 @@
-rpc-friends
+rpcHugs
 ===========
 
 An RPC module for Python
