@@ -96,8 +96,8 @@ class ServerStub(util.StoppableThread):
                                            self.timeout)
             for s in inc:
                 try:
-                    rpc = _accept_thread(self.rpc, s.accept())
-                    rpc.start()
+                    call = _accept_thread(self.rpc, s.accept())
+                    call.start()
                 except socket.error as e:
                     # Q: why do we simply pass here?
                     print e
@@ -106,27 +106,27 @@ class ServerStub(util.StoppableThread):
 
 if __name__ == '__main__':
     #testing comparison:
-
     try:
         rpc = RPC()
         rpc2 = RPC()
 
         d1 = Dummy(rpc, rpc.server_info())
         d2 = Dummy(rpc2, rpc.server_info())
-        print "testing d1 != d2 (should be False)"
-        print d1 != d2
-        print "testing d1 == d2 (should be True)"
-        print d1 == d2
+        t = (d1 != d2)
+        assert t == False
+        t = (d1 == d2)
+        assert t == True
 
-        print "testing dict inclusion (should be True)"
         dct = {}
         dct[d1] = "sup bro"
-        print (d2 in dct)
-
+        t = (d2 in dct)
+        assert t == True
 
         rpc.shutdown()
         rpc2.shutdown()
+        print "all good with the comparison tests man"
     except:
         rpc.shutdown()
         rpc2.shutdown()
         raise
+
