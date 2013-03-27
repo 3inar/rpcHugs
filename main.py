@@ -15,6 +15,15 @@ class Dummy():
 
     def __str__(self):
         return self.proxy[0] +":" + str(self.proxy[1])
+
+    def __eq__(self, other):
+        return str(self) == str(other)
+
+    def __ne__(self, other):
+        return str(self) != str(other)
+
+    def __hash__(self):
+        return hash(str(self))
         
     def __getattr__(self, name):
         # I'm to this day uncertain how this works, just run with it man
@@ -95,7 +104,29 @@ class ServerStub(util.StoppableThread):
                     pass
         self.socket.close()
 
+if __name__ == '__main__':
+    #testing comparison:
 
     try:
+        rpc = RPC()
+        rpc2 = RPC()
+
+        d1 = Dummy(rpc, rpc.server_info())
+        d2 = Dummy(rpc2, rpc.server_info())
+        print "testing d1 != d2 (should be False)"
+        print d1 != d2
+        print "testing d1 == d2 (should be True)"
+        print d1 == d2
+
+        print "testing dict inclusion (should be True)"
+        dct = {}
+        dct[d1] = "sup bro"
+        print (d2 in dct)
+
+
+        rpc.shutdown()
+        rpc2.shutdown()
     except:
+        rpc.shutdown()
+        rpc2.shutdown()
         raise
