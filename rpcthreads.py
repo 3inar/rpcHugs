@@ -26,11 +26,11 @@ def _get_and_call(object, method, *arguments):
         return return_value
 
 class _accept_thread(threading.Thread):
-    def __init__(self, rpc, connection):
+    def __init__(self, rpcObject, connection):
         threading.Thread.__init__(self)
         self.incoming_socket = connection[0]
         self.incoming_address = connection[1]
-        self.rpc = rpc
+        self.rpcObject = rpcObject
 
     def run(self):
         try:
@@ -42,7 +42,7 @@ class _accept_thread(threading.Thread):
             raise socket.error
 
         try:
-            return_value = _get_and_call(self.rpc, m, *arguments)
+            return_value = _get_and_call(self.rpcObject, m, *arguments)
             self.incoming_socket.sendall(pickle.dumps(return_value))
         except socket.error:
             # we don't care whether or no the recipient is there for the result
