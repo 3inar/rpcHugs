@@ -5,9 +5,13 @@ from errno import EAGAIN
 
 def _recv(recv_socket):
         TRYAGAIN = True
+        res = []
         while TRYAGAIN:
             try:
-                incoming_string = recv_socket.recv(4096)
+                while True:
+                    incoming_string = recv_socket.recv(4096)
+                    if not incoming_string: break
+                    res.append(incoming_string)
                 TRYAGAIN = False
             except Exception as e:
                 if e[0] == EAGAIN:
@@ -15,7 +19,7 @@ def _recv(recv_socket):
                     # need to explicitly handle EAGAIN
                     continue
                 raise e
-        return incoming_string
+        return ''.join(res)
 
 def _send(send_socket, data):
     send_socket.sendall(data)
