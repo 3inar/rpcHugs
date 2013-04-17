@@ -43,7 +43,7 @@ class _accept_thread(threading.Thread):
 
         try:
             return_value = _get_and_call(self.rpcObject, m, *arguments)
-            self.incoming_socket.sendall(pickle.dumps(return_value))
+            self.incoming_socket.sendall(pickle.dumps(return_value, 2))
         except socket.error:
             # we don't care whether or no the recipient is there for the result
             pass
@@ -62,7 +62,7 @@ class _call_thread(threading.Thread):
         try:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.connect(self.callee)
-            self.socket.sendall(pickle.dumps(self.message))
+            self.socket.sendall(pickle.dumps(self.message, 2))
             data = _recv(self.socket)
             self.socket.close()
             self.queue.put(pickle.loads(data))
