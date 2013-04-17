@@ -7,7 +7,7 @@ def _recv(recv_socket):
         TRYAGAIN = True
         while TRYAGAIN:
             try:
-                incoming_string = recv_socket.recv(10000)
+                incoming_string = recv_socket.recv(4096)
                 TRYAGAIN = False
             except Exception as e:
                 if e[0] == EAGAIN:
@@ -16,6 +16,10 @@ def _recv(recv_socket):
                     continue
                 raise e
         return incoming_string
+
+def _send(send_socket, data):
+    send_socket.sendall(data)
+    
 
 def _get_and_call(object, method, *arguments):
         try:
@@ -33,17 +37,12 @@ class _accept_thread(threading.Thread):
         self.rpcObject = rpcObject
 
     def run(self):
-        try:
-            binary = _recv(self.incoming_socket)
-            m, arguments = pickle.loads(binary)
-        except EOFError:
-            # Q: what's up with this exception conversion?
-            # it certainly won't percolate up to the parent thread
-            raise socket.error
+        binary = _recv(self.incoming_socket)
+        m, arguments = pickle.loads(binary)
 
         try:
             return_value = _get_and_call(self.rpcObject, m, *arguments)
-            self.incoming_socket.sendall(pickle.dumps(return_value, 2))
+            _send(self.incoming_socket, pickle.dumps(return_value, 2))
         except socket.error:
             # we don't care whether or no the recipient is there for the result
             pass
@@ -62,7 +61,7 @@ class _call_thread(threading.Thread):
         try:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.connect(self.callee)
-            self.socket.sendall(pickle.dumps(self.message, 2))
+            _send(self.socket, pickle.dumps(self.message, 2))
             data = _recv(self.socket)
             self.socket.close()
             self.queue.put(pickle.loads(data))
