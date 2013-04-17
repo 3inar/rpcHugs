@@ -19,6 +19,7 @@ def _recv(recv_socket):
 
 def _send(send_socket, data):
     send_socket.sendall(data)
+    send_socket.shutdown(socket.SHUT_WR)
     
 
 def _get_and_call(object, method, *arguments):
