@@ -66,7 +66,7 @@ class RPC:
 
 class ServerStub(util.StoppableThread):
     def __init__(self, rpc, port=0, backlog=10, timeout=0.5):
-        util.StoppableThread.__init__(self)
+        util.StoppableThread.__init__(self, daemon=True)
         self.socket = None
         self.backlog = backlog
         self.rpc = rpc

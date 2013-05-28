@@ -34,21 +34,13 @@ if __name__ == "__main__":
         sys.stdout.flush()
 
         # the following can safely be out-commented if you have no PIL
-        from PIL import Image
-        image = Image.open('CLOUDS.jpg')
-        string = image.tostring("jpeg", "RGB").encode("base64")
+        # from PIL import Image
+        # image = Image.open('CLOUDS.jpg')
+        # string = image.tostring("jpeg", "RGB").encode("base64")
 
-        callee.echo(string)
-
+        # callee.echo(string)
     except:
         sys.stdout.write('\n')
         sys.stdout.flush()
         raise
-    finally:
-        # NB that if you DON'T handle exceptions in the RPC thing like this,
-        # an exception will cause you to wait for the server stub forever
-        # (unless the server stub was the thread that died, but that is not
-        # what usually happens)
-        caller_rpc.shutdown()
-        callee_rpc.shutdown()
 
