@@ -46,6 +46,9 @@ class RPC:
     def server_info(self):
         return (self.server.host, self.server.port)
 
+    def getDummy(self, host):
+        return Dummy(self, host)
+
     def call(self, callee, method, *args):
         queue = Queue.Queue()
 

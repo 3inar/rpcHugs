@@ -21,7 +21,7 @@ if __name__ == "__main__":
         callee_rpc = _testRpc()
 
         remote_address = callee_rpc.server_info()
-        callee = Dummy(caller_rpc, remote_address)
+        callee = caller_rpc.getDummy(remote_address)
 
         num_tests = 100
         print 'adding two numbers ' + str(num_tests) + ' times via RPC'
