@@ -22,8 +22,20 @@ def _recv(recv_socket):
         return ''.join(res)
 
 def _send(send_socket, data):
-    send_socket.sendall(data)
-    send_socket.shutdown(socket.SHUT_WR)
+    TRYAGAIN = True
+    while TRYAGAIN:
+        try:
+            while len(data) > 0:
+                send_socket.sendall(data[:4096])
+                data = data[4096:]
+            TRYAGAIN = False
+            send_socket.shutdown(socket.SHUT_WR)
+        except Exception as e:
+            if e[0] == EAGAIN:
+                # this is a workaround to a OS X specific bug where you
+                # need to explicitly handle EAGAIN
+                continue
+            raise e
     
 
 def _get_and_call(object, method, *arguments):
